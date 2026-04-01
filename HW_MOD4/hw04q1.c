@@ -6,9 +6,9 @@
 /*
 *
 *		Homework 4
-*		Estimated Time To Complete: X hours
+*		Estimated Time To Complete: 4.25 hours
 *		@author: Shane McPhillips
-*		@version: 0.1
+*		@version: 1.9
 *		@compiler: Visual Studio
 * 
 */
@@ -57,6 +57,13 @@ void save(char* fileName);
 int addSort(char* studentName_input, char* major_input, char* schoolYear_input, unsigned int studentID_input); // 30 points
 void display();				// 10 points
 void load(char* fileName);	// 10 points
+
+//additive utility functions
+schoolYear getSchoolYearByInt(int value);
+schoolYear getSchoolYearByStr(char* schoolYearInput);
+char* getSchoolYearStr(schoolYear value);
+void iSort();
+
 
 int main()
 {
@@ -140,8 +147,28 @@ void executeAction(char c)
 // Hint: 'count' holds the number of students currently in the list
 int addSort(char* studentName_input, char* major_input, char* schoolYear_input, unsigned int studentID_input)
 {
-	struct studentRecord studentTemp;	// needed for swapping structs. Not absolutely necessary to use.
-	return 0;			// edit this line as needed
+	int i;
+	//check first if list is full
+	if (count == MAX_STUDENTS)
+		return -1; //err code for full size.
+
+	//loop through data structure and see if we can find the name (case sensitive) in the list. //if found, return 0.
+	for (i = 0; i < count; i++) {
+		if (strcmp(list[i].studentName, studentName_input) == 0)
+			return 0;
+	}
+	//add to list.
+	strcpy(list[count].studentName, studentName_input);
+	strcpy(list[count].major, major_input);
+	list[count].schoolYear = getSchoolYearByStr(schoolYear_input);
+	list[count].studentID = studentID_input;
+
+	//increment counter.
+	count++;
+
+	//perform sort operation on list. List is sorted up until last member. Insertion sort necessary.
+	iSort();
+	return 1;
 }
 
 
@@ -151,7 +178,14 @@ int addSort(char* studentName_input, char* major_input, char* schoolYear_input, 
 // NOTE: School year is stored in the struct as enum type. You need to display 'freshman','sophomore', 'junior' or 'senior'
 void display()
 {
-
+	int i;
+	printf("\n");
+	for (i = 0; i < count; i++) {
+		printf("Student name: %s\n", list[i].studentName);
+		printf("Major: %s\n", list[i].major);
+		printf("School year: %s\n", getSchoolYearStr(list[i].schoolYear));
+		printf("Student ID: %d\n\n", list[i].studentID);
+	}
 }
 
 
@@ -207,8 +241,6 @@ void save(char* fileName)
 // NOTE: The saved file is not exactly readable because all elements of the struct are not string or char type.
 //       So you need to implement load() similar to how save() is implemented. Only then the 'list' will be loaded correctly.
 //		You can simply delete the file to 'reset the list' or to avoid loading from it.
-
-//10 minutes + 
 void load(char* fileName)
 {
 	FILE* file;
@@ -225,33 +257,103 @@ void load(char* fileName)
 			fread(list[i].studentName, sizeof(list[i].studentName), 1, file);
 			fread(list[i].major, sizeof(list[i].major), 1, file);
 			fread(&schoolYearValue, sizeof(schoolYearValue), 1, file);
-
-			switch (schoolYearValue)	//Determine schoolYear value for index i and set value.
-			{
-			case 0:
-				list[i].schoolYear = freshman;
-				break;
-			case 1:
-				list[i].schoolYear = sophomore;
-				break;
-			case 2:
-				list[i].schoolYear = junior;
-				break;
-			case 3:
-				list[i].schoolYear = senior;
-				break;
-			default:
-				printf("ERROR: SchoolYearValue contains incorrect value associated with SchoolYear enumeration...\n\n"); //Log value mismatch for debug.
-				break;
-			}
-
+			list[i].schoolYear = getSchoolYearByInt(schoolYearValue);
 			fread(&list[i].studentID, sizeof(list[i].studentID), 1, file);
 		}
-
+		printf("Student records loaded from %s\n", fileName);
 		//close the file after reading.
 		fclose(file);
 	}
 	else {
-		printf("ERROR loading file %s... does it exist?\n\n", fileName); //Log nullptr error.
+		printf("%s not found.\n\n", fileName); //Log nullptr error.
+	}
+}
+
+schoolYear getSchoolYearByStr(char* schoolYearInput) {
+	schoolYear result;
+
+	if (strcmp(schoolYearInput, "freshman") == 0) {
+		result = freshman;
+	}
+	else if (strcmp(schoolYearInput, "sophmore") == 0) {
+		result = sophomore;
+	}
+	else if (strcmp(schoolYearInput, "junior") == 0) {
+		result = junior;
+	}
+	else if (strcmp(schoolYearInput, "senior") == 0) {
+		result = senior;
+	}
+	else {
+		printf("ERROR: SchoolYearInput contains incorrect value associated with SchoolYear enumeration...\n\n"); //Log value mismatch for debug.
+		result = senior;
+	}
+	return result;
+}
+
+schoolYear getSchoolYearByInt(int value) {
+	schoolYear result;
+	switch (value)	//Determine schoolYear value.
+	{
+	case 0:
+		result = freshman;
+		break;
+	case 1:
+		result = sophomore;
+		break;
+	case 2:
+		result = junior;
+		break;
+	case 3:
+		result = senior;
+		break;
+	default:
+		printf("ERROR: SchoolYearValue contains incorrect value associated with SchoolYear enumeration...\n\n"); //Log value mismatch for debug.
+		result = senior;
+		break;
+	}
+	return result;
+}
+
+char* getSchoolYearStr(schoolYear value) {
+	char* result;
+
+	switch (value) {
+	case freshman:
+		result = "";
+		break;
+	case sophomore:
+		result = "sophmore";
+		break;
+	case junior:
+		result = "junior";
+		break;
+	case senior:
+		result = "senior";
+		break;
+	default:
+		result = "NULL";
+		break;
+	}
+	return result;
+}
+
+void iSort() {
+	//Only need to sort through entire list once. List sorted each time. Stop sorting list after element does not compare correct.
+
+	//get last element and save value.isInsert = bool, (0 false, - 1 true).
+	int keyIndex = count - 1, previousIndex = keyIndex - 1, isInsert = 0;
+	struct studentRecord tempRecord;
+
+	//Loop through until we find a previousKey that compares less then. Once we do, we stop the sort.
+	while ((previousIndex >= 0) && strcmp(list[previousIndex].studentName, list[keyIndex].studentName) > 0) {
+		//Preform the swap. Struct array swaps are okay and compiler will take care of the copy.
+		tempRecord = list[keyIndex];
+		list[keyIndex] = list[previousIndex];
+		list[previousIndex] = tempRecord;
+
+		//Decrement key and previous indecies.
+		keyIndex--;
+		previousIndex--;
 	}
 }
