@@ -16,6 +16,17 @@
 // ***** GIVE MEANINGFUL NAMES TO VARIABLES. *****
 
 
+/*
+*
+*			Homework 5
+*			Estimated Completion Time: 4 hours
+*			@author: Shane McPhillips
+*			@version: 1.3
+*			Compiler: Visual Studio
+* 
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -148,7 +159,12 @@ int addSort(char* studentName_input, char* major_input, char* schoolYear_input, 
 	struct studentRecord* tempList = list;	// work on a copy of 'list'
 	// enter code here
 
-	//Construct a new student record in memory.
+	/*
+	*
+	* Creating new mem for a new node.
+	* 
+	*/
+	
 	struct studentRecord* newNode = (struct studentRecord*)malloc(sizeof(struct studentRecord)); //Create a new node that will exist outside of function.
 	strcpy(newNode->studentName, studentName_input);
 	strcpy(newNode->major, major_input);
@@ -169,6 +185,7 @@ int addSort(char* studentName_input, char* major_input, char* schoolYear_input, 
 
 	newNode->schoolYear = studentYearType;
 	newNode->IDNumber = IDNumber_input;
+	newNode->next = NULL;
 	
 
 	/*
@@ -206,9 +223,26 @@ int addSort(char* studentName_input, char* major_input, char* schoolYear_input, 
 	*
 	* Sorting function here
 	* 
+	* Top while loop checks for each pass for a swap function call. If we exit the nested while loop with isSorted as 1, we then have had a traversal without a swap. The list is sorted.
 	*/
 
+	int isSorted = 0; //1 for true, 0 for false
 
+	while (isSorted == 0) {
+		isSorted = 1; //set sort to true for each iteration
+		tempList = list; //current node
+		struct studentRecord* nextNode = tempList->next; //next node after current
+
+		while (nextNode != NULL) { //wont be sorted if list is only 1.
+			if (strcmp(tempList->studentName, nextNode->studentName) > 0) { //swap
+				swapNodes(tempList, nextNode);
+				isSorted = 0;
+			}
+			tempList = nextNode;
+			nextNode = nextNode->next;
+		}
+
+	}
 
 	return 1;	//Successfully inserted.
 }
@@ -277,10 +311,34 @@ int countNodes()
 
 int deleteNode(char* studentName_input)
 {	
-	struct studentRecord* tempList = list->next;				// work on a copy of 'list'
+	struct studentRecord* tempList = list;				// work on a copy of 'list'
+	struct studentRecord* prevNode = NULL;				//Secondary copy list for previous node travseral.
 
-	
-	return 0;			// edit this line as needed
+	if (tempList == NULL) {
+		return 2; //list is empty.
+	}
+
+	while (tempList != NULL) {	//Traverse the list
+		if (strcmp(tempList->studentName, studentName_input) == 0) {
+			if (prevNode == NULL) { //Means we are at the front of the list.
+				list = tempList->next; //clip head node and modify original list.
+				free(tempList);
+				return 1;
+			}
+			else {
+				//Processes node removal and frees mem.
+				prevNode->next = tempList->next;
+				free(tempList);
+				return 1;
+			}
+		}
+		else {
+			//Traverse to the next node.
+			prevNode = tempList;
+			tempList = tempList->next;
+		}
+	}
+	return 0;	//Node not found.
 }
 
 
