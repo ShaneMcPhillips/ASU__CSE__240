@@ -148,9 +148,69 @@ int addSort(char* studentName_input, char* major_input, char* schoolYear_input, 
 	struct studentRecord* tempList = list;	// work on a copy of 'list'
 	// enter code here
 
+	//Construct a new student record in memory.
+	struct studentRecord* newNode = (struct studentRecord*)malloc(sizeof(struct studentRecord)); //Create a new node that will exist outside of function.
+	strcpy(newNode->studentName, studentName_input);
+	strcpy(newNode->major, major_input);
+
+	schoolYearType studentYearType;
+	if (strcmp(schoolYear_input, "freshman") == 0) {
+		studentYearType = freshman;
+	}
+	else if (strcmp(schoolYear_input, "sophomore") == 0) {
+		studentYearType = sophomore;
+	}
+	else if (strcmp(schoolYear_input, "junior") == 0) {
+		studentYearType = junior;
+	}
+	else {
+		studentYearType = senior;
+	}
+
+	newNode->schoolYear = studentYearType;
+	newNode->IDNumber = IDNumber_input;
 	
 
-	return 0;	// edit this line as needed
+	/*
+	*
+	* Check for duplicate occurance
+	* 
+	*/
+
+	//check if list is empty. If so, add node and be done.
+	if (tempList == NULL) {
+		list = newNode;
+		return 1;
+	}
+	else { //list has node(s). Traverse and compare. If we find a match, destroy newNode & return 0.
+		while (tempList != NULL) {
+			if (strcmp(newNode->studentName, tempList->studentName) == 0) { //Match found. Disallow node add.
+				free(newNode); //Delete new node.
+				return 0;
+			}
+
+			//set to traverse for next node. Break before we reach a null node so that we have a tail node position for insertion.
+			if (tempList->next != NULL)
+				tempList = tempList->next;
+			else
+				break; //exits while loop.
+		}
+	}
+
+	//Now that we have  the tailend node and we have no duplicate occurances, we can insert at the tail.
+
+	tempList->next = newNode;
+
+
+	/*
+	*
+	* Sorting function here
+	* 
+	*/
+
+
+
+	return 1;	//Successfully inserted.
 }
 
 // Q2 : displayList (10 points)
@@ -161,7 +221,35 @@ void displayList()
 {
 	struct studentRecord* tempList = list;				// work on a copy of 'list'
 	// enter code here
+	while (tempList != NULL) {
+		printf("\n");
+		printf("Student name: %s\n", tempList->studentName);
+		printf("Student major: %s\n", tempList->major);
 
+		char schoolYearString[MAX_NAME_LENGTH];
+		switch (tempList->schoolYear)
+		{
+		case freshman:
+			strcpy(schoolYearString, "freshman");
+			break;
+		case sophomore:
+			strcpy(schoolYearString, "sophomore");
+			break;
+		case junior:
+			strcpy(schoolYearString, "junior");
+			break;
+		case senior:
+			strcpy(schoolYearString, "senior");
+			break;
+		default:
+			break;
+		}
+
+		printf("SchoiolYear: %s\n", schoolYearString);
+		printf("ID number: %d\n", tempList->IDNumber);
+
+		tempList = tempList->next;
+	}
 }
 
 // Q3: countNodes (5 points)
