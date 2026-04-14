@@ -270,7 +270,7 @@ void save(string fileName)
 	outFile.open(fileName, ios::trunc | ios::binary);
 
 	if (!outFile.is_open()) {
-		cout << "Error saving list data to file: " << fileName << endl;
+		//cout << "Error saving list data to file: " << fileName << endl;
 	}
 	else {
 		//write room count for load processing.
@@ -324,7 +324,7 @@ void load(string fileName)
 	inFile.open(fileName, ios::in | ios::binary);
 
 	if (!inFile.is_open()) {
-		cout << "Error loading list data from file: " << fileName << endl;
+		//cout << "Error loading list data from file: " << fileName << endl;
 	}
 	else {
 		//read in room number = list node number.
