@@ -314,11 +314,10 @@ void save(string fileName)
 // Hint: If you casted the enum 'libraryType' to an int, you will need to cast it back to 'libraryType' when making the room node.
 // This function is called at the beginning of main().
 
-void load(string fileName)
-{
+void load(string fileName) {
 	ifstream inFile;
-	int containerCount;
-	string temp;
+	Container* tempList = NULL;
+	bool firstNode = true;
 
 	//Open a binary file for reading in.
 	inFile.open(fileName, ios::in | ios::binary);
@@ -328,9 +327,9 @@ void load(string fileName)
 	}
 	else {
 		//read in room number = list node number.
-		inFile >> containerCount;
+		inFile >> numActiveContainers;
 		//loop through and retrieve data. Let add functionality above handle room make.
-		for (int count = 0; count < containerCount; count++) {
+		for (int count = 0; count < numActiveContainers; count++) {
 			//Load in room data variables. Name, room count, library-type.
 			string roomName;
 			int numRooms, libType;
@@ -338,10 +337,35 @@ void load(string fileName)
 			inFile >> numRooms;
 			inFile >> libType;
 
+			//construct new container and new room.
+			Container* container = new Container();
+			Room* room;
+			libraryType type = (libraryType)libType;
+			//Determine which library type room subclass.
+			if (type == hayden) {
+				room = new Hayden(roomName, numRooms, type);
+			}
+			else {
+				room = new Noble(roomName, numRooms, type);
+			}
+
+			container->room = room;
+
+			if (firstNode) {
+				firstNode = false;
+				list = container;
+				tempList = list;
+			}
+			else {
+				tempList->next = container;
+				tempList = tempList->next;
+			}
+
+			/*
 			//Add room using built functionality.
 			addRoom(roomName, numRooms, (libraryType)libType);
+			*/
 		}
-
 		//close file.
 		inFile.close();
 	}

@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/HW_MOD7/mcphillips_shane7.zip
+/.gitignore
